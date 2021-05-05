@@ -12,4 +12,5 @@
     "website": "https://github.com/OCA/server-ux",
     "data": ["views/res_config_settings.xml", "views/res_users.xml"],
     "installable": True,
+    "post_init_hook": "gubi_auto_fill",
 }
