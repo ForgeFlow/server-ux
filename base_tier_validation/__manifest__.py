@@ -23,6 +23,7 @@
         "views/tier_review_view.xml",
         "views/assets_backend.xml",
         "wizard/comment_wizard_view.xml",
+        "wizard/tier_definition_selection_wizard_views.xml",
     ],
     'qweb': [
         'static/src/xml/systray.xml',

@@ -365,6 +365,42 @@ class TierValidation(models.AbstractModel):
         self._notify_review_requested(created_trs)
         return created_trs
 
+    def action_request_custom_validation(self):
+        wizard = self.env.ref("base_tier_validation.view_tier_validation_selection_wizard")
+        return {
+            "name": _("Select Custom Validation"),
+            "type": "ir.actions.act_window",
+            "view_mode": "form",
+            "res_model": "tier.validation.selection.wizard",
+            "views": [(wizard.id, "form")],
+            "view_id": wizard.id,
+            "target": "new",
+            "context": {
+                "default_res_id": self.id,
+                "default_res_model": self._name,
+            },
+        }
+
+    @api.multi
+    def request_custom_validation(self, tier_definitions):
+        tr_obj = created_trs = self.env['tier.review']
+        for rec in self:
+            if getattr(rec, self._state_field) in self._state_from:
+                if rec.need_validation:
+                    sequence = 0
+                    for td in tier_definitions:
+                        sequence += 1
+                        created_trs += tr_obj.create({
+                            'model': self._name,
+                            'res_id': rec.id,
+                            'definition_id': td.id,
+                            'sequence': sequence,
+                            'requested_by': self.env.uid,
+                        })
+                    self._update_counter()
+        self._notify_review_requested(created_trs)
+        return created_trs
+
     @api.multi
     def restart_validation(self):
         for rec in self:
