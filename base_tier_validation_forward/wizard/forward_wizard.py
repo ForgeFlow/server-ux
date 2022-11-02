@@ -15,6 +15,37 @@ class ValidationForwardWizard(models.TransientModel):
     forward_description = fields.Char()
     has_comment = fields.Boolean(string="Allow Comment", default=True)
     approve_sequence = fields.Boolean(string="Approve by sequence", default=True,)
+    can_backward = fields.Boolean(
+        string="Can ask for review",
+        compute="_compute_can_backward"
+    )
+    backward = fields.Boolean(
+        string="Ask for review",
+        default=False
+    )
+
+    def _compute_can_backward(self):
+        self.ensure_one()
+        record = self.env[self.res_model].browse(self.res_id)
+        self.can_backward = record.can_backward
+
+    def _get_tier_review_data(self, rec, prev_review):
+        data = {
+            "name": self.forward_description,
+            "model": rec._name,
+            "res_id": rec.id,
+            "sequence": round(prev_review.sequence + 0.1, 2),
+            "requested_by": self.env.uid,
+            "review_type": "individual",
+            "reviewer_id": self.forward_reviewer_id.id,
+            "has_comment": self.has_comment,
+            "approve_sequence": self.approve_sequence,
+        }
+        if self.backward:
+            data.update({
+                "origin_id": prev_review.id,
+            })
+        return data
 
     def add_forward(self):
         """ Add extra step, with specific reviewer """
@@ -27,18 +58,9 @@ class ValidationForwardWizard(models.TransientModel):
             {"comment": _(">> %s") % self.forward_reviewer_id.display_name}
         )
         prev_reviews = prev_comment.add_comment()
+        prev_review = prev_reviews.sorted("sequence")[-1:]  # Get max sequence
         self.env["tier.review"].create(
-            {
-                "name": self.forward_description,
-                "model": rec._name,
-                "res_id": rec.id,
-                "sequence": max(prev_reviews.mapped("sequence")) + 0.1,
-                "requested_by": self.env.uid,
-                "review_type": "individual",
-                "reviewer_id": self.forward_reviewer_id.id,
-                "has_comment": self.has_comment,
-                "approve_sequence": self.approve_sequence,
-            }
+            self._get_tier_review_data(rec, prev_review)
         )
         rec.invalidate_cache()
         rec.review_ids._compute_can_review()

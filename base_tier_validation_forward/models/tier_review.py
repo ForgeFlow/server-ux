@@ -31,6 +31,11 @@ class TierReview(models.Model):
     approve_sequence = fields.Boolean(
         compute="_compute_definition_data", store=True, readonly=False,
     )
+    origin_id = fields.Many2one(
+        comodel_name="tier.review",
+        copy=False,
+        help="Reference to origin tier review that createก this tier.",
+    )
 
     @api.depends(
         "definition_id.name",
