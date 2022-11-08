@@ -102,8 +102,9 @@ class TierValidation(models.AbstractModel):
 
     def _validate_tier(self, tiers=False):
         self.ensure_one()
-        self._create_backward(tiers)
+        backwards = self._create_backward(tiers)
         super()._validate_tier(tiers=tiers)
+        backwards._compute_can_review()
 
     def _create_backward(self, tiers):
         """ Find the forward tier that require to backward """
@@ -114,8 +115,9 @@ class TierValidation(models.AbstractModel):
             and r.origin_id.definition_id.has_forward  # Forward
             and r.origin_id.definition_id.backward  # To Backward
         )
+        created_backward_reviews = self.env["tier.review"]
         for review in to_backward_reviews:
-            review.origin_id.copy(
+            new_backward_tier = review.origin_id.copy(
                 {
                     "sequence": round(review.sequence + 0.1, 2),
                     "done_by": False,
@@ -125,3 +127,5 @@ class TierValidation(models.AbstractModel):
                     "origin_id": False,
                 }
             )
+            created_backward_reviews += new_backward_tier
+        return created_backward_reviews
