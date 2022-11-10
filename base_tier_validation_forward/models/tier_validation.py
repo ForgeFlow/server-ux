@@ -7,6 +7,7 @@ class TierValidation(models.AbstractModel):
     _inherit = "tier.validation"
 
     can_forward = fields.Boolean(compute="_compute_can_forward")
+    can_backward = fields.Boolean(compute="_compute_can_backward")
 
     def _compute_can_forward(self):
         for rec in self:
@@ -17,6 +18,16 @@ class TierValidation(models.AbstractModel):
             reviews = rec.review_ids.filtered(lambda l: l.sequence in sequences)
             definitions = reviews.mapped("definition_id")
             rec.can_forward = True in definitions.mapped("has_forward")
+
+    def _compute_can_backward(self):
+        for rec in self:
+            if not rec.can_review:
+                rec.can_backward = False
+                continue
+            sequences = self._get_sequences_to_approve(self.env.user)
+            reviews = rec.review_ids.filtered(lambda l: l.sequence in sequences)
+            definitions = reviews.mapped("definition_id")
+            rec.can_backward = True in definitions.mapped("backward")
 
     @api.model
     def _calc_reviews_validated(self, reviews):
@@ -73,7 +84,7 @@ class TierValidation(models.AbstractModel):
         post = "message_post"
         if hasattr(self, post):
             # Notify state change
-            getattr(self, post)(
+            getattr(self.sudo(), post)(
                 subtype=self._get_forwarded_notification_subtype(),
                 body=self._notify_forwarded_reviews_body(),
             )
@@ -88,3 +99,33 @@ class TierValidation(models.AbstractModel):
                 "A review was forwarded from {} {}".format(self.env.user.name, comment)
             )
         return _("A review was forwarded by %s.") % (self.env.user.name)
+
+    def _validate_tier(self, tiers=False):
+        self.ensure_one()
+        backwards = self._create_backward(tiers)
+        super()._validate_tier(tiers=tiers)
+        backwards._compute_can_review()
+
+    def _create_backward(self, tiers):
+        """ Find the forward tier that require to backward """
+        tier_reviews = tiers or self.review_ids
+        to_backward_reviews = tier_reviews.filtered(
+            lambda r: r.status == "pending"
+            and (self.env.user in r.reviewer_ids)
+            and r.origin_id.definition_id.has_forward  # Forward
+            and r.origin_id.definition_id.backward  # To Backward
+        )
+        created_backward_reviews = self.env["tier.review"]
+        for review in to_backward_reviews:
+            new_backward_tier = review.origin_id.copy(
+                {
+                    "sequence": round(review.sequence + 0.1, 2),
+                    "done_by": False,
+                    "reviewed_date": False,
+                    "status": "pending",
+                    "comment": False,
+                    "origin_id": False,
+                }
+            )
+            created_backward_reviews += new_backward_tier
+        return created_backward_reviews
