@@ -79,6 +79,10 @@ class TierDefinition(models.Model):
         self.reviewer_id = None
         self.reviewer_group_id = None
 
+    @api.onchange("model_id")
+    def onchange_model_id(self):
+        self.definition_domain = ""
+
     @api.depends("review_type", "model_id")
     def _compute_domain_reviewer_field(self):
         for rec in self:
