@@ -1168,6 +1168,85 @@ class TierTierValidation(CommonTierValidation):
             self.test_user_3_multi_company.partner_id, followers.mapped("partner_id")
         )
 
+    def test_32_notify_only_tier_validation(self):
+        tier_definition = self.env["tier.definition"].search([])
+        tier_definition.write(
+            {
+                "subscription_mode": "standard",
+                "notify_on_create": True,
+                "notify_on_accepted": True,
+                "notify_on_rejected": True,
+                "notify_on_restarted": True,
+                "review_type": "group",
+                "reviewer_group_id": self.env.ref("base.group_system").id,
+            }
+        )
+        # notify on create
+        test_record_1 = self.test_model.create({"test_field": 2.5})
+        notifications_no_1 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        test_record_1.request_validation()
+        notifications_no_2 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        self.assertEqual(notifications_no_2, notifications_no_1 + 1)
+
+        # notify on message post
+        notifications_no_1 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        test_record_1.message_post(
+            body="Message post on test_record.",
+            subtype_id=self.env.ref("mail.mt_comment").id,
+        )
+        notifications_no_2 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        self.assertEqual(notifications_no_2, notifications_no_1 + 1)
+
+        tier_definition.write({"subscription_mode": "tier_validation"})
+
+        # notify on create
+        test_record_2 = self.test_model.create({"test_field": 2.5})
+        notifications_no_1 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        test_record_2.request_validation()
+        notifications_no_2 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        self.assertEqual(notifications_no_2, notifications_no_1 + 1)
+
+        # do not notify on message post
+        notifications_no_1 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        test_record_2.message_post(
+            body="Message post on test_record.",
+            subtype_id=self.env.ref("mail.mt_comment").id,
+        )
+        notifications_no_2 = len(
+            self.env["mail.notification"].search(
+                [("res_partner_id", "=", self.test_user_1.partner_id.id)]
+            )
+        )
+        self.assertEqual(notifications_no_2, notifications_no_1)
+
 
 @tagged("at_install")
 class TierTierValidationView(CommonTierValidation):
