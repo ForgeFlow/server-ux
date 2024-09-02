@@ -983,6 +983,44 @@ class TierTierValidation(CommonTierValidation):
             )
         )
         self.assertEqual(notifications_no_2, notifications_no_1)
+        
+    def test_27_reevaluate_validation(self):
+        # Create new test record
+        test_record = self.test_model.create(
+            {"test_field": 100, "test_validation_field": 15}
+        )
+        # Create tier definitions for both tester models
+        self.tier_def_obj.create(
+            {
+                "model_id": self.tester_model.id,
+                "review_type": "individual",
+                "reviewer_id": self.test_user_1.id,
+                "definition_domain": "[('test_field', '>', 100)]",
+            }
+        )
+        # Request validation
+        reviews = test_record.with_user(self.test_user_2.id).request_validation()
+        # Check need validation
+        self.assertTrue(test_record.need_validation)
+        self.assertEqual(len(reviews), 1)
+
+        # Now record is not validated yet and new definition create,
+        # and then we reevaluate object then it will add new definition validation
+        # also in current object
+        self.tier_def_obj.create(
+            {
+                "model_id": self.tester_model.id,
+                "review_type": "individual",
+                "reviewer_id": self.test_user_1.id,
+                "definition_domain": "[('test_validation_field', '>', 10)]",
+            }
+        )
+
+        # Reevaluate Validation
+        reviews = test_record.with_user(self.test_user_2.id).reevaluate_reviews()
+        # Check need validation
+        self.assertTrue(test_record.need_validation)
+        self.assertEqual(len(reviews), 2)
 
 
 @tagged("at_install")
