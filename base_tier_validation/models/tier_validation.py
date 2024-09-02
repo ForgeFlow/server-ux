@@ -12,7 +12,7 @@ from odoo.exceptions import ValidationError
 from odoo.osv.expression import OR
 from odoo.tools.misc import frozendict
 
-BASE_EXCEPTION_FIELDS = ["message_follower_ids", "access_token"]
+BASE_EXCEPTION_FIELDS = ["message_follower_ids", "access_token", "need_validation"]
 
 
 class TierValidation(models.AbstractModel):
@@ -676,6 +676,13 @@ class TierValidation(models.AbstractModel):
                 if hasattr(self, subscribe):
                     getattr(self, subscribe)(partner_ids=partners_to_notify_ids)
                 rec._notify_restarted_review()
+
+    def reevaluate_reviews(self):
+        reviews = self.env["tier.review"]
+        for rec in self:
+            rec._compute_need_validation()
+            reviews += rec.request_validation()
+        return reviews
 
     @api.model
     def _update_counter(self, review_counter):
