@@ -46,7 +46,7 @@ class IrExportsLine(models.Model):
         "ir.model", "Fourth model", compute="_compute_model4_id", compute_sudo=True
     )
     sequence = fields.Integer()
-    label = fields.Char(compute="_compute_label", compute_sudo=True)
+    label = fields.Char(compute="_compute_label")
 
     @api.depends("field1_id", "field2_id", "field3_id", "field4_id")
     def _compute_name(self):
@@ -177,10 +177,6 @@ class IrExportsLine(models.Model):
         :param str name:
             Technical name of the field, like ``child_ids``.
         """
-
-        # Handle special case "id" field
-        name = "id" if name == ".id" else name
-
         field = (
             self.env["ir.model.fields"]
             .sudo()

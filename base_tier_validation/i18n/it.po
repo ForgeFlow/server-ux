@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-01-19 13:50+0000\n"
+"PO-Revision-Date: 2024-08-26 12:06+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.15.2\n"
+"X-Generator: Weblate 5.6.2\n"
 
 #. module: base_tier_validation
 #. odoo-javascript
@@ -46,9 +46,9 @@ msgstr "<span class=\"oe_edit_only\">Nome</span>"
 
 #. module: base_tier_validation
 #: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
-msgid "<span>Bypass, if previous tier was validated by same reviewer</span>"
+msgid "<span>Bypassed, if previous tier was validated by same reviewer</span>"
 msgstr ""
-"<span>Aggira, se il livello precedente è stato validato dallo stesso "
+"<span>Aggirato, se il livello precedente è stato validato dallo stesso "
 "revisore</span>"
 
 #. module: base_tier_validation
@@ -298,7 +298,7 @@ msgstr "Dominio"
 #. module: base_tier_validation
 #: model:ir.model.fields,field_description:base_tier_validation.field_tier_review__done_by
 msgid "Done By"
-msgstr "Eseguito da"
+msgstr "Eseguito Da"
 
 #. module: base_tier_validation
 #. odoo-javascript
@@ -382,11 +382,6 @@ msgid ""
 msgstr ""
 "Se impostata, i revisori verranno avvisati con e-mail quando una revisione "
 "relativa a questa definizione viene riavviata."
-
-#. module: base_tier_validation
-#: model:ir.model.fields,field_description:base_tier_validation.field_tier_validation__is_reevaluation_required
-msgid "Is Reevaluation Required"
-msgstr "È richiesta la rivalutazione"
 
 #. module: base_tier_validation
 #: model_terms:ir.actions.act_window,help:base_tier_validation.tier_validation_exception_action
@@ -556,11 +551,6 @@ msgid "Pending"
 msgstr "In attesa"
 
 #. module: base_tier_validation
-#: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_validation_buttons
-msgid "Reevaluate Reviews"
-msgstr "Rivalutazione revisioni"
-
-#. module: base_tier_validation
 #: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__model_id
 msgid "Referenced Model"
 msgstr "Modello referenziato"
@@ -627,7 +617,7 @@ msgstr "Riavvia validazione"
 #. module: base_tier_validation
 #: model:ir.model.fields,field_description:base_tier_validation.field_comment_wizard__review_ids
 msgid "Review"
-msgstr "Revisione"
+msgstr "Approvazione"
 
 #. module: base_tier_validation
 #: model:ir.model.fields,field_description:base_tier_validation.field_tier_definition__reviewer_id
@@ -952,12 +942,6 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base_tier_validation.tier_definition_view_form
 msgid "e.g. Tier Validation for..."
 msgstr "es. Validazione livello per ..."
-
-#~ msgid ""
-#~ "<span>Bypassed, if previous tier was validated by same reviewer</span>"
-#~ msgstr ""
-#~ "<span>Aggirato, se il livello precedente è stato validato dallo stesso "
-#~ "revisore</span>"
 
 #~ msgid ""
 #~ "<i class=\"fa fa-info-circle\"/>\n"

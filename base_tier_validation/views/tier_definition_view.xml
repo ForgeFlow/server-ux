@@ -71,19 +71,15 @@
                             />
                             <field name="sequence" />
                             <field name="approve_sequence" />
-                            <label
-                                for="approve_sequence_bypass"
-                                class="o_form_label"
-                                attrs="{'invisible': [('approve_sequence', '=', False)]}"
-                            />
+                            <label for="approve_sequence_bypass" invisible="1" />
                             <div
                                 name="approve_sequence_bypass_div"
-                                class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0"
+                                class="o_row"
                                 attrs="{'invisible': [('approve_sequence', '=', False)]}"
                             >
                                 <field name="approve_sequence_bypass" />
                                 <span
-                                >Bypass, if previous tier was validated by same reviewer</span>
+                                >Bypassed, if previous tier was validated by same reviewer</span>
                             </div>
                         </group>
                     </group>
